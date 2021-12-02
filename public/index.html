@@ -1,0 +1,106 @@
+<html>
+    <head>
+        <title>Download TikTok video WITHOUT watermark!</title>
+        <style>
+            body {
+                margin: 0;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                background-color: #3072e2;
+            }
+
+            h1,
+            h2 {
+                color: #fff;
+            }
+
+            h1 {
+                margin-top: 6rem;
+                font-size: 3rem;
+            }
+
+            h2 {
+                margin-top: 1rem;
+                margin-bottom: 1rem;
+                font-size: 1.5rem;
+                font-weight: 400;
+            }
+
+            form {
+                display: flex;
+                flex-direction: row;
+            }
+
+            input[name="url"] {
+                border-color: #3273dc;
+                background-color: #fff;
+                border-width: 0;
+                color: #363636;
+                outline: none;
+                padding: 4px 6px;
+            }
+
+            button {
+                padding: 4px 6px;
+                background-color: #20bf6b;
+                color: white;
+                outline: none;
+                border:  none;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>TikTok Video Download</h1>
+        <h2>Without Watermark. Fast. All devices</h2>
+        <form id="form" method="POST" action="/download">
+            <input type="text" name="url" required="required" placeholder="Put url here" />
+            <button>Download!</button>
+        </form>
+        <script>
+            const form = document.getElementById('form')
+            const input = document.querySelector('input[name="url"]')
+            const button = document.querySelector('button')
+
+            form.addEventListener('submit', function onSubmit(e) {
+                e.preventDefault()
+                input.disabled = true
+                button.innerText = 'Video is processing...'
+
+                fetch('/download', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        url: input.value,
+                    })
+                })
+                    .then(res => {
+                        const name = res.headers.get('Content-Disposition').split(' ')[1].split('=')[1]
+                        
+                        return res.blob().then((blob) => {
+                            return {
+                                blob,
+                                name,
+                            }
+                        })
+                    })
+                    .then(({
+                        blob,
+                        name
+                    }) => {
+                        input.disabled = false
+                        input.value = ''
+                        button.innerText = 'Download!'
+
+                        const href = window.URL.createObjectURL(blob)
+                        const a = document.createElement('a')
+                        a.href = href
+                        a.download = name
+                        a.click()
+                    })
+            })
+        </script>
+    </body>
+</html>
